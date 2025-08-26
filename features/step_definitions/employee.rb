@@ -1,62 +1,76 @@
 Dado('que o usuario consulte informacoes de Funcionario') do
-    @get_url = 'http://dummy.restapiexample.com/api/v1/employees'
+    @getlist = Employee_Requests.new
+    @assert = Assertions.new
 end
 
 Quando('ele fizer a busca') do
-    @list_employee = HTTParty.get(@get_url)
+    @list_employee = @getlist.find_employee
 end
 
 Entao('uma lista com os funcionarios deve retornar') do
-    expect(@list_employee.code).to eql 200
-    expect(@list_employee.message).to eql 'OK'
+ @assert.request_success(@list_employee.code, @list_employee.message)
 end
 
+
+
 Dado('que o usuario cadastre um novo usuario') do
-    @post_url ='http://dummy.restapiexample.com/api/v1/create'
+    @create = Employee_Requests.new
+    @assert = Assertions.new
 end
 
 Quando('ele enviar as informacoes do funcionario') do
-    @create_employee = HTTParty.post(@post_url, :headers => {'Content-Type': 'application/json'}, body: {
-        "employee_name": "Gabriel Brasil",
-        "employee_salary": 540800,
-        "employee_age": 32,
-        "profile_image": ""
-    }.to_json)
+    @create_employee = @create.create_employee(DATABASE[:name][:name7], DATABASE[:salary][:salary7], DATABASE[:age][:age7])
+    puts(@create_employee)
 
 end
 
 Entao('esse funcionario sera cadastrado') do
-    expect(@create_employee.code).to eql (200)
-    expect(@create_employee.msg).to eql 'OK'
+    @assert.request_success(@create_employee.code, @create_employee.message)
     expect(@create_employee["status"]).to eql 'success'
     expect(@create_employee["message"]).to eql 'Successfully! Record has been added.'
-    expect(@create_employee.parsed_response["data"]['employee_name']).to eql 'Gabriel Brasil'
-    expect(@create_employee.parsed_response["data"]['employee_salary']).to eql (540800)
-    expect(@create_employee.parsed_response["data"]['employee_age']).to eql (32)
+    expect(@create_employee.parsed_response["data"]['employee_name']).to eql DATABASE[:name][:name7]
+    expect(@create_employee.parsed_response["data"]['employee_salary']).to eql DATABASE[:salary][:salary7]
+    expect(@create_employee.parsed_response["data"]['employee_age']).to eql DATABASE[:age][:age7]
 end
 
+
+
 Dado('que o usuario altere uma informacao de funcionario') do
-    @put_url = 'http://dummy.restapiexample.com/api/v1/update/10'
+    @request = Employee_Requests.new
+    @assert = Assertions.new
 end
 
 Quando('ele enviar as alteracoes') do
-@update_employee = HTTParty.put(@put_url, :headers => {'Content-Type': 'application/json'}, body: {
-        "employee_name": "Joao",
-        "employee_salary": 840800,
-        "employee_age": 30,
-        "profile_image": ""
-    }.to_json)
-
-    puts(@update_employee)
-
+    @employee = @request.find_employee
+    sleep 60
+    @update_employee = @request.update_employee(@employee['data'][0]['id'], DATABASE[:name][:name1], DATABASE[:salary][:salary1], DATABASE[:age][:age1])
+    puts @update_employee
 end
 
 Entao('as informacoes serao alteradas') do
-    expect(@update_employee.code).to eql (200)
-    expect(@update_employee.msg).to eql 'OK'
+    @assert.request_success(@update_employee.code, @update_employee.msg)
     expect(@update_employee["status"]).to eql 'success'
     expect(@update_employee["message"]).to eql 'Successfully! Record has been updated.'
-    expect(@update_employee.parsed_response["data"]['employee_name']).to eql 'Joao'
-    expect(@update_employee.parsed_response["data"]['employee_salary']).to eql (840800)
-    expect(@update_employee.parsed_response["data"]['employee_age']).to eql (30)  
+    expect(@update_employee.parsed_response["data"]['employee_name']).to eql DATABASE[:name][:name1]
+    expect(@update_employee.parsed_response["data"]['employee_salary']).to eql DATABASE[:salary][:salary1]
+    expect(@update_employee.parsed_response["data"]['employee_age']).to eql DATABASE[:age][:age1]
+end
+
+
+Dado('que o usuario queira apagar um funcionario') do
+  @request = Employee_Requests.new
+  @assert = Assertions.new
+end
+
+Quando('ele enviar a identificacao do funcionario') do
+   @employee = @request.find_employee
+   sleep 60
+   @del_employee = @request.delete_employee(@employee['data'][0]['id'])
+end
+
+Entao('esse funcionario devera ser apagado') do
+  @assert.request_success(@del_employee.code, @del_employee.msg)
+  expect(@del_employee["status"]).to eql 'success'
+  expect(@del_employee["data"]).to eql '1'
+  expect(@del_employee["message"]).to eql 'Successfully! Record has been deleted'
 end

@@ -5,6 +5,7 @@ Funcionalidade: Pesquisar Funcionarios
     O usuario do sistema
     Deseja poder consultar informacoes dos Funcionarios
 
+    @cenario_um
     Cenario: Buscar informacoes de Funcionario
         Dado que o usuario consulte informacoes de Funcionario
         Quando ele fizer a busca
@@ -21,3 +22,9 @@ Funcionalidade: Pesquisar Funcionarios
         Dado que o usuario altere uma informacao de funcionario
         Quando ele enviar as alteracoes
         Entao as informacoes serao alteradas
+    
+    @cenario_quatro
+    Cenario: Apagar funcionario
+        Dado que o usuario queira apagar um funcionario
+        Quando ele enviar a identificacao do funcionario
+        Entao esse funcionario devera ser apagado
